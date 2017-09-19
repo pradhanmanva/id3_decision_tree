@@ -1,4 +1,6 @@
+import pandas as pd
+import numpy as number
 
-def cleanCSV(file):
 
-    return ""
+s = pd.Series()
+print(s)
