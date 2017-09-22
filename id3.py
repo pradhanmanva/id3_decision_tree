@@ -1,7 +1,7 @@
 import json
 import math
 import sys
-
+from decision_tree import *
 import pandas as pd
 import yaml
 
@@ -30,21 +30,21 @@ def find_entropy(dataframe, colname):
 
 
 def no_of_parts(total_data, column_name):
-    node = {column_name: []}
-
+    # node = {column_name: []}
+    node  = Node(column_name)
     grouped_data = total_data.groupby(column_name)
     for parts in grouped_data:
-        part_dict = {str(parts[0]): []}
+        # part_dict = {str(parts[0]): []}
         new_sliced_data = parts[1].drop(column_name, 1)
-        part_dict[str(parts[0])] = column_at_level(new_sliced_data)
-        node[column_name].append(part_dict)
+        sub_node = column_at_level(new_sliced_data)
+        if (isinstance(sub_node,str)):
+            node.setPrediction(sub_node)
+        elif (parts[0] == 0):
+            node.insert_left(sub_node)
+        else:
+            node.insert_right(sub_node)
+        # node[column_name].append(part_dict)
     return node
-
-
-def print_tree(tree_dict):
-    json.dumps(tree_dict, indent=4)
-    json_tree = json.loads(json.dumps(tree_dict, indent=4))
-    print(yaml.safe_dump(json_tree, allow_unicode=True, default_flow_style=False))
 
 
 def column_at_level(sliced_data):
@@ -73,6 +73,13 @@ def all_zero(given_list):
         return False
 
 
+
+def print_tree(tree_dict):
+    json.dumps(tree_dict, indent=4)
+    json_tree = json.loads(json.dumps(tree_dict, indent=4))
+    print(yaml.safe_dump(json_tree, allow_unicode=True, default_flow_style=False))
+
+
 def predict(row, tree_dict):
     key = list(tree_dict.keys())[0]
     val = row[key]
@@ -81,20 +88,20 @@ def predict(row, tree_dict):
         next_node = tree_dict[key][0][str(val)]
     else:
         next_node = tree_dict[key][1][str(val)]
-    if isinstance(next_node,str):
+    if isinstance(next_node, str):
         return int(next_node)
     return predict(row, next_node)
 
 
 def find_accuracy(df, tree_dict):
-    predicted_output = df.apply(lambda row: predict(row, tree_dict),axis=1)
+    predicted_output = df.apply(lambda row: predict(row, tree_dict), axis=1)
     count = 0
     given_output = df["Class"]
     for i in range(len(predicted_output)):
         if predicted_output[i] == given_output[i]:
-            count+=1
+            count += 1
 
-    print ("Accuracy: %f"%(count/len(predicted_output)*100))
+    print("Accuracy: %f" % (count / len(predicted_output) * 100))
     # print(predicted_output)
 
 
@@ -119,9 +126,10 @@ if __name__ == "__main__":
     selected_column = col_list[selected_column_no]
     # print(selected_column)
 
-    tree_dict = no_of_parts(decision_data, selected_column)
-    print(tree_dict)
-    print_tree(tree_dict)
-
-    find_accuracy(decision_data, tree_dict)
-    find_accuracy(testData,tree_dict)
+    tree = no_of_parts(decision_data, selected_column)
+    print_inorder(tree)
+    # print(tree_dict)
+    # print_tree(tree_dict)
+    #
+    # find_accuracy(decision_data, tree_dict)
+    # find_accuracy(testData, tree_dict)
