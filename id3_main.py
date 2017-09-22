@@ -44,7 +44,6 @@ def find_entropy(S):
         sums += -1 * count * math.log(count, 2)
     return sums
 
-
 def gain_ratio(data, col):
     items, dict = subtables(data, col, delete=False)
     total_size = data.shape[0]
@@ -75,14 +74,4 @@ if __name__ == "__main__":
     validationData = read_file(cmdLine[3])
     print(validationData)
 
-
-    col_list = trainData.columns.values
-    trainingInstances = trainData.length
-    entropy = []
-    for x in col_list:
-        entropy.append(find_entropy(trainData, x))
-    entropy.pop(len(entropy) - 1)
-
-    selected_column_no = entropy.index(min(entropy))
-    selected_column = col_list[selected_column_no]
-    print(selected_column)
+    find_entropy(trainData)
