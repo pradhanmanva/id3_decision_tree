@@ -1,7 +1,7 @@
 import json
 import math
 import sys
-
+from decision_tree import *
 import pandas as pd
 import yaml
 
@@ -30,21 +30,24 @@ def find_entropy(dataframe, colname):
 
 
 def no_of_parts(total_data, column_name):
-    node = {column_name: []}
-
+    list_node = {column_name: []}   #DE
+    tree_node = Node(column_name)
     grouped_data = total_data.groupby(column_name)
     for parts in grouped_data:
-        part_dict = {str(parts[0]): []}
+        part_dict = {str(parts[0]): []}     #de
         new_sliced_data = parts[1].drop(column_name, 1)
-        part_dict[str(parts[0])] = column_at_level(new_sliced_data)
-        node[column_name].append(part_dict)
-    return node
+        part_dict[str(parts[0])],sub_node = column_at_level(new_sliced_data) #first ard
+        list_node[column_name].append(part_dict)    #de
 
+        # sub_node = column_at_level(new_sliced_data)
+        if (isinstance(sub_node, str)):
+            tree_node.setPrediction(sub_node)
+        elif (parts[0] == 0):
+            tree_node.insert_left(sub_node)
+        else:
+            tree_node.insert_right(sub_node)
 
-def print_tree(tree_dict):
-    json.dumps(tree_dict, indent=4)
-    json_tree = json.loads(json.dumps(tree_dict, indent=4))
-    print(yaml.safe_dump(json_tree, allow_unicode=True, default_flow_style=False))
+    return list_node,tree_node  #first arg
 
 
 def column_at_level(sliced_data):
@@ -54,12 +57,19 @@ def column_at_level(sliced_data):
         entropy.append(find_entropy(sliced_data, x))
 
     if (all_zero(entropy)):
-        return str(sliced_data.iloc[0, len(col_list) - 1])
+        return str(sliced_data.iloc[0, len(col_list) - 1]),str(sliced_data.iloc[0, len(col_list) - 1])  #de 2ndd param
     else:
         entropy.pop(len(entropy) - 1)
         selected_column_no = entropy.index(min(entropy))
         selected_column = col_list[selected_column_no]
         return no_of_parts(sliced_data, selected_column)
+
+
+def print_tree(tree_dict):
+    json.dumps(tree_dict, indent=4)
+    json_tree = json.loads(json.dumps(tree_dict, indent=4))
+    print(yaml.safe_dump(json_tree, allow_unicode=True, default_flow_style=False))
+
 
 
 def all_zero(given_list):
@@ -85,15 +95,35 @@ def predict(row, tree_dict):
         return int(next_node)
     return predict(row, next_node)
 
+def predict_tree(row, tree):
+    key = tree.getData()
+    val = row[key]
 
-def find_accuracy(df, tree_dict):
-    predicted_output = df.apply(lambda row: predict(row, tree_dict),axis=1)
+    if val == 0:
+        if tree.getLeftChild() is None:
+            return tree.getPrediction()
+        return predict_tree(row,tree.getLeftChild())
+    else:
+        if tree.getRightChild() is None:
+            return tree.getPrediction()
+        return predict_tree(row,tree.getRightChild())
+
+
+def find_accuracy(df, tree_dict,tree,data_type):
+    predicted_output = df.apply(lambda row: predict(row, tree_dict),axis=1)     #de
+    predicted_output_tree = df.apply(lambda row: predict_tree(row, tree),axis=1)    #rename to predicted_output
+
+    # print(predicted_output)     #de
+    # print(predicted_output_tree)
+
     count = 0
     given_output = df["Class"]
     for i in range(len(predicted_output)):
         if predicted_output[i] == given_output[i]:
             count+=1
 
+    print ("Number of ",data_type," instances = %d" % len(df))
+    print ("Number of ",data_type," attributes = %d" % (len(df.columns.values)-1))
     print ("Accuracy: %f"%(count/len(predicted_output)*100))
     # print(predicted_output)
 
@@ -119,9 +149,9 @@ if __name__ == "__main__":
     selected_column = col_list[selected_column_no]
     # print(selected_column)
 
-    tree_dict = no_of_parts(decision_data, selected_column)
+    tree_dict,tree = no_of_parts(decision_data, selected_column)
     print(tree_dict)
     print_tree(tree_dict)
 
-    find_accuracy(decision_data, tree_dict)
-    find_accuracy(testData,tree_dict)
+    find_accuracy(decision_data, tree_dict,tree,"Training")
+    # find_accuracy(testData,tree_dict)

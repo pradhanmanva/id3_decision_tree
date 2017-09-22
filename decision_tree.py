@@ -58,9 +58,15 @@ class Node:
             count += self.left.count_leaves()
         return count
 
-
 def print_inorder(tree):
     if tree:
         print(tree.data)
+        print_inorder(tree.left)
+        print_inorder(tree.right)
+
+def print_inorder(tree,count=0):
+    if tree:
+        print(tree.data)
+        count=count+1
         print_inorder(tree.left)
         print_inorder(tree.right)
