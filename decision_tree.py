@@ -58,15 +58,38 @@ class Node:
             count += self.left.count_leaves()
         return count
 
-def print_inorder(tree):
-    if tree:
-        print(tree.data)
-        print_inorder(tree.left)
-        print_inorder(tree.right)
+    def getLeafNode(self):
+        if self.is_leaf():
+            return 1
+        count = 0
+        if self.right is not None:
+            count += self.right.count_leaves()
+        if self.left is not None:
+            count += self.left.count_leaves()
+        return count
 
-def print_inorder(tree,count=0):
+def print_preorder(tree):
     if tree:
-        print(tree.data)
-        count=count+1
-        print_inorder(tree.left)
-        print_inorder(tree.right)
+        print(tree.data, end="")
+        print()
+        print_preorder(tree.left)
+        print_preorder(tree.right)
+
+
+def get_total_nodes(root):
+    if (root.get_left() is None) and (root.get_right() is None):  # we are a leaf
+        return 1
+
+    left_child = root.get_left()
+    if left_child is not None:
+        left_children = left_child.count_leaves
+    else:
+        left_children = 0
+
+    right_child = root.get_right()
+    if right_child is not None:
+        right_children = right_child.countLeaves
+    else:
+        right_children = 0
+
+    return left_children + right_children
