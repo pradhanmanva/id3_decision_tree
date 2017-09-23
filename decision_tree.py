@@ -61,17 +61,16 @@ class Node:
     def getLeafNode(self):
         if self.is_leaf():
             return 1
-        count = 0
+        count = []
         if self.right is not None:
-            count += self.right.count_leaves()
+            count.append(self.right.)
         if self.left is not None:
             count += self.left.count_leaves()
         return count
 
 def print_preorder(tree):
     if tree:
-        print(tree.data, end="")
-        print()
+        print(tree.data)
         print_preorder(tree.left)
         print_preorder(tree.right)
 
