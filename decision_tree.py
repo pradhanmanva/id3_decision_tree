@@ -1,10 +1,10 @@
 class Node:
-    def __init__(self, data, error=None, left=None, right=None, parent=None):
+    def __init__(self, data, error=None, left=None, right=None):
         self.data = data
         self.error = error
         self.left = left
         self.right = right
-        self.parent = parent
+        self.parent = None
         self.prediction = None
 
     def getPrediction(self):
@@ -12,6 +12,12 @@ class Node:
 
     def setPrediction(self, value):
         self.prediction = value
+
+    def getParent(self):
+        return self.Parent
+
+    def setParent(self, value):
+        self.Parent = value
 
     def getLeftChild(self):
         return self.left

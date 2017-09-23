@@ -44,7 +44,7 @@ def no_of_parts(total_data, column_name):
         list_node[column_name].append(part_dict)  # de
 
         # sub_node = column_at_level(new_sliced_data)
-        sub_node.parent = tree_node
+
         if isinstance(sub_node, str):
             tree_node.setPrediction(sub_node)
         elif parts[0] == 0:
@@ -142,6 +142,7 @@ def prune_Tree(node, pruning_factor):
     for i in leaf_nodes:
         parent = i.parent
         node, pruning_factor = prune_split(node, parent, pruning_factor)
+    return node
 
 
 def prune_split(node, parent, pruning_factor):
@@ -164,7 +165,7 @@ if __name__ == "__main__":
     decision_data = pd.DataFrame(read_file(cmd_line[1]))
     test_data = pd.DataFrame(read_file(cmd_line[2]))
     validation_data = pd.DataFrame(read_file(cmd_line[3]))
-    pruning_factor = int(cmd_line[4])
+    pruning_factor = float(cmd_line[4])
 
     col_list = decision_data.columns.values
     entropy = []
@@ -179,9 +180,19 @@ if __name__ == "__main__":
     print(tree_dict)
     print_tree(tree_dict)
 
+    print("Pre-Pruned Accuracy")
+    print("----------------------")
     print("Total Leaf nodes :" + str(tree.count_leaves()))
     find_accuracy(decision_data, tree_dict, tree, "Training")
     find_accuracy(test_data, tree_dict, tree, "Test")
     find_accuracy(validation_data, tree_dict, tree, "Validation")
 
-    totalnodes = get_total_nodes(tree)
+    pruning_factor = pruning_factor * get_total_nodes(tree)
+    new_Tree = prune_Tree(tree, pruning_factor)
+
+    print("Post-Pruned Accuracy")
+    print("----------------------")
+    print("Total Leaf nodes :" + str(tree.count_leaves()))
+    find_accuracy(decision_data, tree_dict, tree, "Training")
+    find_accuracy(test_data, tree_dict, tree, "Test")
+    find_accuracy(validation_data, tree_dict, tree, "Validation")
