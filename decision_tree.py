@@ -1,9 +1,10 @@
 class Node:
-    def __init__(self, data, error=None, left=None, right=None):
+    def __init__(self, data, error=None, left=None, right=None, parent=None):
         self.data = data
         self.error = error
         self.left = left
         self.right = right
+        self.parent = parent
         self.prediction = None
 
     def getPrediction(self):
@@ -60,13 +61,14 @@ class Node:
 
     def getLeafNode(self):
         if self.is_leaf():
-            return 1
+            return self
         count = []
         if self.right is not None:
-            count.append(self.right.)
+            count.append(self.right.getLeafNode())
         if self.left is not None:
-            count += self.left.count_leaves()
+            count.append(self.left.getLeafNode())
         return count
+
 
 def print_preorder(tree):
     if tree:

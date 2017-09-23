@@ -44,12 +44,14 @@ def no_of_parts(total_data, column_name):
         list_node[column_name].append(part_dict)  # de
 
         # sub_node = column_at_level(new_sliced_data)
+        sub_node.parent = tree_node
         if isinstance(sub_node, str):
             tree_node.setPrediction(sub_node)
         elif parts[0] == 0:
             tree_node.insert_left(sub_node)
         else:
             tree_node.insert_right(sub_node)
+
     return list_node, tree_node  # first arg
 
 
@@ -125,6 +127,36 @@ def find_accuracy(df, tree_dict, tree, data_type):
     print("Accuracy: %f" % (count / len(predicted_output) * 100))
 
 
+def find_error(df, tree):
+    predicted_output = df.apply(lambda row: predict_tree(row, tree), axis=1)  # rename to predicted_output
+    count = 0
+    given_output = df["Class"]
+    for i in range(len(predicted_output)):
+        if predicted_output[i] == given_output[i]:
+            count += 1
+    return 1 - (count / len(predicted_output) * 100)
+
+
+def prune_Tree(node, pruning_factor):
+    leaf_nodes = node.getLeafNode()
+    for i in leaf_nodes:
+        parent = i.parent
+        node, pruning_factor = prune_split(node, parent, pruning_factor)
+
+
+def prune_split(node, parent, pruning_factor):
+    temp = node
+    total_cost = find_error(temp) + (0.05 * temp.get_total_nodes)
+    new_tree = temp.delete(parent)
+    total_cost_new = find_error(new_tree) + (0.05 * new_tree.get_total_nodes())
+
+    if total_cost_new < total_cost:
+        pruning_factor -= 1
+        return new_tree, pruning_factor
+    else:
+        return node, pruning_factor
+
+
 if __name__ == "__main__":
     cmd_line = sys.argv
 
@@ -152,4 +184,4 @@ if __name__ == "__main__":
     find_accuracy(test_data, tree_dict, tree, "Test")
     find_accuracy(validation_data, tree_dict, tree, "Validation")
 
-
+    totalnodes = get_total_nodes(tree)
