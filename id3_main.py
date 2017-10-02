@@ -44,7 +44,7 @@ def no_of_parts(total_data, column_name):
         part_dict[str(parts[0])], sub_node = column_at_level(new_sliced_data)  # first ard
         list_node[column_name].append(part_dict)  # de
 
-        #sub_node = column_at_level(new_sliced_data)
+        # sub_node = column_at_level(new_sliced_data)
 
         if isinstance(sub_node, str):
             tree_node.setPrediction(sub_node)
@@ -157,7 +157,7 @@ def prune_tree(node, prune_fact, df):
 def prune_split(node, prune_fact, df):
     temp = node
     total_cost = find_error(df, temp) + (0.05 * count(temp))
-    new_tree = temp.delete(temp.parent)
+    new_tree = temp.parent.delete()
     total_cost_new = find_error(df, new_tree) + (0.05 * count(new_tree))
 
     if total_cost_new < total_cost:

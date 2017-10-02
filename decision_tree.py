@@ -58,12 +58,12 @@ class Node:
     def delete(self):
         par = self.parent
         if par is None:
-            return
+            return self
         if par.left.data == self.data:
             par.left = None
         else:
             par.right = None
-
+        return par
 
 def count_leaves(self):
     if self.is_leaf():
